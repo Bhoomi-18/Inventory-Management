@@ -8,7 +8,7 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Separator } from "../../components/ui/separator";
 import { useState, useEffect } from "react";
-import type { Sale, Product } from "./addSale"; 
+import type { Sale} from "./addSale"; 
 import axios from "axios";
 
 type Props = {

@@ -5,7 +5,7 @@ import { Separator } from "../../components/ui/separator";
 import { Input } from "../../components/ui/input"; 
 import LowStockList from "./lowStockList";
 import TopProductsTable from "./topProductsTable";
-import CustomerLeaderboard from "./customerLeaderboard";
+import CustomerLeaderboard from "./customerList";
 
 type Sale = {
   _id: string;
@@ -73,9 +73,9 @@ const ReportsDashboard = () => {
         </CardContent>
       </Card>
 
+      <LowStockList products={products} />
       <TopProductsTable sales={filteredSales} />
       <CustomerLeaderboard sales={filteredSales} />
-      <LowStockList products={products} />
     </div>
   );
 };

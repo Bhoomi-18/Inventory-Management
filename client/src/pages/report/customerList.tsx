@@ -1,44 +1,40 @@
-import { PackageSearch, Boxes, IndianRupee } from "lucide-react";
+import { UsersRound, ShoppingCart, IndianRupee } from "lucide-react";
 
 type Sale = {
-  productId: {
-    name: string;
-    price: number;
-  };
-  quantity: number;
+  customerName: string;
   totalPrice: number;
+};
+
+type LeaderData = {
+  purchases: number;
+  spent: number;
 };
 
 type Props = {
   sales: Sale[];
 };
 
-type ProductStats = {
-  quantity: number;
-  revenue: number;
-};
-
-const TopProductsTable = ({ sales }: Props) => {
-  const productStats: Record<string, ProductStats> = {};
+const CustomerList = ({ sales }: Props) => {
+  const leaderboard: Record<string, LeaderData> = {};
 
   sales.forEach((sale) => {
-    const name = sale.productId.name;
-    if (!productStats[name]) {
-      productStats[name] = { quantity: 0, revenue: 0 };
+    const name = sale.customerName?.trim() || "Anonymous";
+    if (!leaderboard[name]) {
+      leaderboard[name] = { purchases: 0, spent: 0 };
     }
-    productStats[name].quantity += sale.quantity;
-    productStats[name].revenue += sale.totalPrice;
+    leaderboard[name].purchases += 1;
+    leaderboard[name].spent += sale.totalPrice;
   });
 
-  const rows = Object.entries(productStats)
-    .sort(([, a], [, b]) => b.revenue - a.revenue)
+  const ranked = Object.entries(leaderboard)
+    .sort(([, a], [, b]) => b.spent - a.spent)
     .slice(0, 5);
 
   return (
     <div className="p-6 bg-white rounded-md shadow-md space-y-6 border border-gray-200">
       <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-        <PackageSearch className="w-6 h-6 text-purple-500" />
-        Top-Selling Products
+        <UsersRound className="w-6 h-6 text-blue-500" />
+        Customer List
       </h2>
 
       <table className="w-full text-sm border border-gray-200 rounded-md overflow-hidden">
@@ -46,34 +42,34 @@ const TopProductsTable = ({ sales }: Props) => {
           <tr>
             <th className="px-4 py-2 text-left font-medium">
               <div className="flex items-center gap-1">
-                <Boxes className="w-4 h-4 text-gray-500" />
-                <span>Product</span>
+                <UsersRound className="w-4 h-4 text-gray-500" />
+                <span>Customer</span>
               </div>
             </th>
             <th className="px-4 py-2 text-center font-medium">
               <div className="flex items-center justify-center gap-1">
-                <PackageSearch className="w-4 h-4 text-gray-500" />
-                <span>Quantity</span>
+                <ShoppingCart className="w-4 h-4 text-gray-500" />
+                <span>Orders</span>
               </div>
             </th>
             <th className="px-4 py-2 text-right font-medium">
               <div className="flex items-center justify-end gap-1">
                 <IndianRupee className="w-4 h-4 text-gray-500" />
-                <span>Revenue</span>
+                <span>Spent</span>
               </div>
             </th>
           </tr>
         </thead>
         <tbody>
-          {rows.map(([name, stats], index) => (
+          {ranked.map(([name, data], index) => (
             <tr
               key={name}
               className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
             >
               <td className="px-4 py-2 font-semibold text-gray-800">{name}</td>
-              <td className="px-4 py-2 text-center">{stats.quantity}</td>
+              <td className="px-4 py-2 text-center">{data.purchases}</td>
               <td className="px-4 py-2 text-right text-green-700 font-medium">
-                ₹{stats.revenue.toFixed(2)}
+                ₹{data.spent.toFixed(2)}
               </td>
             </tr>
           ))}
@@ -83,4 +79,5 @@ const TopProductsTable = ({ sales }: Props) => {
   );
 };
 
-export default TopProductsTable;
+
+export default CustomerList;

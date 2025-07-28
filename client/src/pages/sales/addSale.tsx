@@ -54,8 +54,8 @@ const AddSale = () => {
   const availableProducts = products.filter((p) => p.stock > 0);
 
   useEffect(() => {
-    axios.get("https://inventory-management-ogu0.onrender.com/api/products").then((res) => setProducts(res.data));
-    axios.get("https://inventory-management-ogu0.onrender.com/api/sales").then((res) => setSales(res.data));
+    axios.get("/api/products").then((res) => setProducts(res.data));
+    axios.get("/api/sales").then((res) => setSales(res.data));
   }, []);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ const AddSale = () => {
         return setStatus("Invalid product or insufficient stock");
       }
 
-      await axios.post("https://inventory-management-ogu0.onrender.com/api/sales", {
+      await axios.post("/api/sales", {
         productId,
         quantity,
         customerName,
@@ -90,7 +90,7 @@ const AddSale = () => {
         )
       );
 
-      const updatedSales = await axios.get("https://inventory-management-ogu0.onrender.com/api/sales");
+      const updatedSales = await axios.get("/api/sales");
       setSales(updatedSales.data);
     } catch (err) {
       setStatus("Failed to record sale");

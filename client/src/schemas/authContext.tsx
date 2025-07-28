@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const res = await fetch('https://inventory-management-ogu0.onrender.com/api/auth/me', {
+        const res = await fetch('/api/auth/me', {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,

@@ -25,7 +25,7 @@ const AddCategoryDialog = ({ onSuccess }: { onSuccess: () => void;
   const onSubmit = async (data: { name: string }) => {
     try {
       setLoading(true);
-      await axios.post("https://inventory-management-ogu0.onrender.com/api/categories", data);
+      await axios.post("/api/categories", data);
       reset();
       onSuccess();
     } catch (err) {

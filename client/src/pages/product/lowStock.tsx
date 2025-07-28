@@ -17,7 +17,7 @@ const LowStockProducts = () => {
 
   useEffect(() => {
     axios
-      .get("https://inventory-management-ogu0.onrender.com/api/products/low-stock?limit=10")
+      .get("/api/products/low-stock?limit=10")
       .then((res) => setLowStockProducts(res.data))
       .catch((err) => console.error("Failed to fetch low stock products", err));
   }, []);

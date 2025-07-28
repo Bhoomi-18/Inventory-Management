@@ -19,13 +19,13 @@ const AddProductDialog = ({ onSuccess, open, onOpenChange }: Props) => {
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    axios.get("https://inventory-management-ogu0.onrender.com/api/categories").then((res) =>
+    axios.get("/api/categories").then((res) =>
       setCategories(res.data.map((cat: { name: string }) => cat.name))
     );
   }, []);
 
   const handleCreate = async (data: ProductFormValues) => {
-    const res = await axios.post("https://inventory-management-ogu0.onrender.com/api/products", data);
+    const res = await axios.post("/api/products", data);
     onSuccess(res.data);
   };
 

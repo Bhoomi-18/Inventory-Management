@@ -14,7 +14,7 @@ const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const fetchCategories = () => {
-    axios.get("https://inventory-management-ogu0.onrender.com/api/categories")
+    axios.get("/api/categories")
       .then((res) => setCategories(res.data))
       .catch((err) => console.error("Category fetch error:", err));
   };

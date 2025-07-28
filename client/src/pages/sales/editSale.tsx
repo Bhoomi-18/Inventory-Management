@@ -32,7 +32,7 @@ const EditSaleDialog = ({ sale, onSuccess, onClose }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`https://inventory-management-ogu0.onrender.com/api/sales/${sale._id}`, {
+      const response = await axios.put(`/api/sales/${sale._id}`, {
         quantity,
         customerName,
       });

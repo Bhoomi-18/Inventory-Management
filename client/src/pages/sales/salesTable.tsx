@@ -42,7 +42,7 @@ const SalesTable = ({ sales }: Props) => {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`https://inventory-management-ogu0.onrender.com/api/sales/${id}`, {
+      const res = await fetch(`/api/sales/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {

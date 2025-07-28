@@ -19,10 +19,10 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [productsRes, categoriesRes, lowStockRes, recentRes] = await Promise.all([
-          axios.get("https://inventory-management-ogu0.onrender.com/api/products"),
-          axios.get("https://inventory-management-ogu0.onrender.com/api/categories"),
-          axios.get("https://inventory-management-ogu0.onrender.com/api/products/low-stock"),
-          axios.get("https://inventory-management-ogu0.onrender.com/api/products?limit=5"),
+          axios.get("/api/products"),
+          axios.get("/api/categories"),
+          axios.get("/api/products/low-stock"),
+          axios.get("/api/products?limit=5"),
         ]);
 
         setMetrics({

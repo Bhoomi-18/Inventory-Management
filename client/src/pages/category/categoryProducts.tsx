@@ -13,7 +13,7 @@ const CategoryProducts = () => {
     const [showAddDialog, setShowAddDialog] = useState(false);
 
   useEffect(() => {
-    axios.get(`/api/products/category/${name}`)
+    axios.get(`https://inventory-management-ogu0.onrender.com/api/products/category/${name}`)
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));
   }, []);

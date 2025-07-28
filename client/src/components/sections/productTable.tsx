@@ -59,7 +59,7 @@ const ProductTable = ({ products: initialProducts }: Props) => {
   const confirmDelete = async () => {
     if (!productToDelete) return;
     try {
-      await axios.delete(`/api/products/${productToDelete._id}`);
+      await axios.delete(`https://inventory-management-ogu0.onrender.com/api/products/${productToDelete._id}`);
       setProducts((prev) => prev.filter((p) => p._id !== productToDelete._id));
     } catch (error) {
       console.error("Failed to delete product:", error);

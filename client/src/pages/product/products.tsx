@@ -17,7 +17,7 @@ const Products = () => {
 
   useEffect(() => {
     axios
-      .get("/api/products")
+      .get("https://inventory-management-ogu0.onrender.com/api/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error("Failed to fetch products", err));
   }, []);

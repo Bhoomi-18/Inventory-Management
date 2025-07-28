@@ -27,8 +27,8 @@ const ReportsDashboard = () => {
   const [toDate, setToDate] = useState("");
 
   useEffect(() => {
-    axios.get("/api/sales").then((res) => setSales(res.data));
-    axios.get("/api/products").then((res) => setProducts(res.data));
+    axios.get("https://inventory-management-ogu0.onrender.com/api/sales").then((res) => setSales(res.data));
+    axios.get("https://inventory-management-ogu0.onrender.com/api/products").then((res) => setProducts(res.data));
   }, []);
 
   useEffect(() => {

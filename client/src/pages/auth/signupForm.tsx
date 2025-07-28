@@ -17,7 +17,7 @@ const SignupForm = () => {
 
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch('https://inventory-management-ogu0.onrender.com/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -26,7 +26,7 @@ const SignupForm = () => {
       const responseData = await res.json();
       if (!res.ok) throw new Error(responseData.message || 'Signup failed');
 
-      localStorage.setItem('token', responseData.token); // 🌟 Store JWT
+      localStorage.setItem('token', responseData.token); 
       window.location.href = '/inventory';
     } catch (err) {
       console.error(err);

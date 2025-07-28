@@ -17,7 +17,7 @@ const LoginForm = () => {
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('https://inventory-management-ogu0.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -26,9 +26,9 @@ const LoginForm = () => {
       const responseData = await res.json();
       if (!res.ok) throw new Error(responseData.message || 'Login failed');
 
-      localStorage.setItem('token', responseData.token); // 🎯 Store JWT
+      localStorage.setItem('token', responseData.token);
 
-      window.location.href = '/inventory'; // Redirect on success
+      window.location.href = '/inventory'; 
     } catch (err) {
       console.error(err);
     }

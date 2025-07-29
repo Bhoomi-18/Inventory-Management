@@ -15,14 +15,14 @@ app.use(express.json());
 
 const mongoUri = process.env.MONGO_URI;
 if (!mongoUri) {
-  console.error("❌ MONGO_URI is missing from environment variables.");
+  console.error("MONGO_URI is missing from environment variables.");
   process.exit(1);
 }
 
 mongoose
   .connect(mongoUri)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -30,5 +30,5 @@ app.use("/api/sales", saleRoutes)
 app.use("/api/auth", userRoutes)
 
 app.listen(5000, () => {
-  console.log("🚀 Server running on http://localhost:5000");
+  console.log("Server running on http://localhost:5000");
 });

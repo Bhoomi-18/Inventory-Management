@@ -18,7 +18,7 @@ import {
   CommandEmpty,
 } from "../../components/ui/command";
 import { Popover, PopoverTrigger, PopoverContent } from "../../components/ui/popover";
-import { ChevronDown } from "lucide-react"; // or any icon lib
+import { ChevronDown } from "lucide-react";
 import SalesTable from "./salesTable";
 
 export type Product = {

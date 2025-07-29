@@ -54,13 +54,11 @@ const Products = () => {
 
       <Separator />
 
-      {/* Product table should trigger edit */}
       <ProductTable
         products={products}
         onEdit={(product: Product) => setEditProduct(product)}
       />
 
-      {/* Edit Dialog */}
       {editProduct && (
         <EditProductDialog
           product={editProduct}

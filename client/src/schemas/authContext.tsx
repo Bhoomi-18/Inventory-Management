@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchUser = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        // No token = no user session, just fallback gracefully
         setUser(null);
         setLoading(false);
         return;

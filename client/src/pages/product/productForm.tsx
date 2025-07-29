@@ -28,7 +28,6 @@ const ProductFormBody = ({ initialValues, categories, onSubmit, onClose }: Props
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-      {/* Inputs for name, price, stock */}
       <Input placeholder="Name" {...register("name")} />
       {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
 
@@ -38,7 +37,6 @@ const ProductFormBody = ({ initialValues, categories, onSubmit, onClose }: Props
       <Input type="number" placeholder="Stock" {...register("stock", { valueAsNumber: true })} />
       {errors.stock && <p className="text-sm text-red-500">{errors.stock.message}</p>}
 
-      {/* Category select */}
       <Controller
         name="category"
         control={control}
@@ -59,7 +57,6 @@ const ProductFormBody = ({ initialValues, categories, onSubmit, onClose }: Props
       />
       {errors.category && <p className="text-sm text-red-500">{errors.category.message}</p>}
 
-      {/* Actions */}
       <div className="flex justify-end gap-3">
         <Button type="submit">Save</Button>
         {onClose && (

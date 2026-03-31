@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import User from '../../models/userModel';
+import { getGlobalModels } from '../../models/globalModels';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
     try {
+      const { User } = await getGlobalModels();
       const user = await User.findOne({ email });
       if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -18,6 +19,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
       res.status(200).json({ token });
     } catch (err) {
+      console.error('Login error:', err);
       res.status(500).json({ message: 'Server error' });
     }
 }

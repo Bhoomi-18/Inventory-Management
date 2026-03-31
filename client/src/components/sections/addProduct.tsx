@@ -5,9 +5,15 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/apiClient";
 import ProductFormBody from "../../pages/product/productForm";
 import type { Product, ProductFormValues } from "../../schemas/productSchema";
+
+type Category = {
+  name: string;
+  color?: string;
+  icon?: string;
+};
 
 type Props = {
   onSuccess: (newProduct: Product) => void;
@@ -16,17 +22,29 @@ type Props = {
 };
 
 const AddProductDialog = ({ onSuccess, open, onOpenChange }: Props) => {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("https://inventory-management-ogu0.onrender.com/api/categories").then((res) =>
-      setCategories(res.data.map((cat: { name: string }) => cat.name))
-    );
-  }, []);
+    if (open) {
+      setLoading(true);
+      api
+        .get('/categories')
+        .then((res) => setCategories(res.data))
+        .catch((err) => console.error('Failed to fetch categories', err))
+        .finally(() => setLoading(false));
+    }
+  }, [open]);
 
   const handleCreate = async (data: ProductFormValues) => {
-    const res = await axios.post("https://inventory-management-ogu0.onrender.com/api/products", data);
-    onSuccess(res.data);
+    try {
+      const res = await api.post('/products', data);
+      onSuccess(res.data);
+      onOpenChange(false);
+    } catch (err: any) {
+      console.error("Product creation failed", err);
+      throw err;
+    }
   };
 
   return (
@@ -35,7 +53,17 @@ const AddProductDialog = ({ onSuccess, open, onOpenChange }: Props) => {
         <DialogHeader>
           <DialogTitle>Add New Product</DialogTitle>
         </DialogHeader>
-        <ProductFormBody categories={categories} onSubmit={handleCreate} />
+        {loading ? (
+          <div className="py-8 text-center text-muted-foreground">
+            Loading categories...
+          </div>
+        ) : (
+          <ProductFormBody
+            categories={categories}
+            onSubmit={handleCreate}
+            onClose={() => onOpenChange(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

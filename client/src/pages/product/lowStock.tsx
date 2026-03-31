@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/apiClient";
 import ProductTable from "../../components/sections/productTable";
 import { Separator } from "../../components/ui/separator";
 
@@ -16,10 +16,10 @@ const LowStockProducts = () => {
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    axios
-      .get("https://inventory-management-ogu0.onrender.com/api/products/low-stock?limit=10")
+    api
+      .get('/products/low-stock?limit=10')
       .then((res) => setLowStockProducts(res.data))
-      .catch((err) => console.error("Failed to fetch low stock products", err));
+      .catch((err) => console.error('Failed to fetch low stock products', err));
   }, []);
 
   return (

@@ -6,11 +6,19 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Button } from "../../components/ui/button"; 
+import { Button } from "../../components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { salesColumns } from "./salesColumn";
 import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import EditSaleDialog from "./editSale";
+import { DeleteSaleDialog } from "./deleteSale";
 import type { Sale } from "./addSale";
 
 type Props = {
@@ -19,15 +27,23 @@ type Props = {
 
 const SalesTable = ({ sales }: Props) => {
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
+  const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [data, setData] = useState(sales);
+  const [pagination, setPagination] = useState({
+    pageSize: 10,
+    pageIndex: 0,
+  });
 
   useEffect(() => {
-  setData(sales);
-}, [sales]);
+    setData(sales);
+  }, [sales]);
 
   const table = useReactTable({
     data: data,
     columns: salesColumns,
+    state: { pagination },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -40,19 +56,10 @@ const SalesTable = ({ sales }: Props) => {
     setEditingSale(null);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch(`https://inventory-management-ogu0.onrender.com/api/sales/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const { error } = await res.json();
-        throw new Error(error || "Failed to delete sale");
-      }
-      setData((prev) => prev.filter((sale) => sale._id !== id));
-    } catch (err) {
-      console.error(err);
-    }
+  const handleDeleteSuccess = () => {
+    setData((prev) => prev.filter((sale) => sale._id !== saleToDelete?._id));
+    setDeleteOpen(false);
+    setSaleToDelete(null);
   };
 
   return (
@@ -92,7 +99,10 @@ const SalesTable = ({ sales }: Props) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(row.original._id)}
+                  onClick={() => {
+                    setSaleToDelete(row.original);
+                    setDeleteOpen(true);
+                  }}
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
@@ -102,13 +112,35 @@ const SalesTable = ({ sales }: Props) => {
         </TableBody>
       </Table>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-          Previous
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          Next
-        </Button>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="text-sm text-muted-foreground">
+          Page {pagination.pageIndex + 1} of {table.getPageCount()}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted-foreground">Rows per page:</label>
+          <Select value={String(pagination.pageSize)} onValueChange={(value) => {
+            table.setPageSize(parseInt(value));
+          }}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+            Previous
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            Next
+          </Button>
+        </div>
       </div>
 
       {editingSale && (
@@ -119,6 +151,14 @@ const SalesTable = ({ sales }: Props) => {
         />
       )}
 
+      {saleToDelete && (
+        <DeleteSaleDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          sale={saleToDelete}
+          onSuccess={handleDeleteSuccess}
+        />
+      )}
     </div>
   );
 };

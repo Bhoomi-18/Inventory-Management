@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/apiClient";
 import {
   Card,
   CardHeader,
@@ -31,6 +31,7 @@ export type Product = {
 export type Sale = {
   _id: string;
   productId: {
+    _id: string;
     name: string;
     price: number;
   };
@@ -49,30 +50,46 @@ const AddSale = () => {
   const [customerName, setCustomerName] = useState("");
   const [price, setPrice] = useState(0);
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [quantityError, setQuantityError] = useState("");
   const [open, setOpen] = useState(false);
 
   const availableProducts = products.filter((p) => p.stock > 0);
 
   useEffect(() => {
-    axios.get("https://inventory-management-ogu0.onrender.com/api/products").then((res) => setProducts(res.data));
-    axios.get("https://inventory-management-ogu0.onrender.com/api/sales").then((res) => setSales(res.data));
+    setLoading(true);
+    Promise.all([
+      api.get('/products').then((res) => setProducts(res.data)),
+      api.get('/sales').then((res) => setSales(res.data))
+    ]).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     const selected = products.find((p) => p._id === productId);
     setSelectedProduct(selected || null);
-    if (selected) setPrice(selected.price);
+    if (selected) {
+      setPrice(selected.price);
+      setStatus(""); // Clear success message when product changes
+    }
   }, [productId, products]);
 
   const handleSale = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
       const selected = products.find((p) => p._id === productId);
-      if (!selected || selected.stock < quantity) {
-        return setStatus("Invalid product or insufficient stock");
+      if (!selected) {
+        setStatus("Please select a product");
+        return;
+      }
+      if (selected.stock < quantity) {
+        setQuantityError(`Only ${selected.stock} items available in stock`);
+        return;
       }
 
-      await axios.post("https://inventory-management-ogu0.onrender.com/api/sales", {
+      setSubmitting(true);
+      await api.post('/sales', {
         productId,
         quantity,
         customerName,
@@ -84,16 +101,29 @@ const AddSale = () => {
       setCustomerName("");
       setPrice(0);
       setSelectedProduct(null);
+      setQuantityError("");
       setProducts((prev) =>
         prev.map((p) =>
           p._id === productId ? { ...p, stock: p.stock - quantity } : p
         )
       );
 
-      const updatedSales = await axios.get("https://inventory-management-ogu0.onrender.com/api/sales");
+      const updatedSales = await api.get('/sales');
       setSales(updatedSales.data);
-    } catch (err) {
-      setStatus("Failed to record sale");
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || "Failed to record sale";
+      setStatus(errorMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleQuantityChange = (value: number) => {
+    setQuantity(value);
+    if (selectedProduct && value > selectedProduct.stock) {
+      setQuantityError(`Only ${selectedProduct.stock} items available in stock`);
+    } else {
+      setQuantityError("");
     }
   };
 
@@ -109,76 +139,88 @@ const AddSale = () => {
           <CardTitle className="text-base">Sale Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSale} className="space-y-4">
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="w-full justify-between"
-                >
-                  {selectedProduct
-                    ? `${selectedProduct.name} — ₹${selectedProduct.price}`
-                    : "Search products..."}
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
-                  <CommandInput placeholder="Search products..." />
-                  <CommandList>
-                    <CommandEmpty>No products found</CommandEmpty>
-                    <CommandGroup>
-                      {availableProducts.map((p) => (
-                        <CommandItem
-                          key={p._id}
-                          value={p.name}
-                          onSelect={() => {
-                            setProductId(p._id);
-                            setOpen(false);
-                          }}
-                        >
-                          {p.name} — ₹{p.price} ({p.stock} left)
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+          {loading ? (
+            <div className="py-8 text-center text-muted-foreground">
+              Loading products...
+            </div>
+          ) : (
+            <form onSubmit={handleSale} className="space-y-4">
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between"
+                  >
+                    {selectedProduct
+                      ? `${selectedProduct.name} — ₹${selectedProduct.price}`
+                      : "Search products..."}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search products..." />
+                    <CommandList>
+                      <CommandEmpty>No products found</CommandEmpty>
+                      <CommandGroup>
+                        {availableProducts.map((p) => (
+                          <CommandItem
+                            key={p._id}
+                            value={p.name}
+                            onSelect={() => {
+                              setProductId(p._id);
+                              setOpen(false);
+                            }}
+                          >
+                            {p.name} — ₹{p.price} ({p.stock} left)
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
-            <Input
-              type="number"
-              min={1}
-              max={selectedProduct?.stock || 1}
-              placeholder="Quantity"
-              value={quantity}
-              onChange={(e) => {
-                const stock = selectedProduct?.stock || 1;
-                const value = Math.min(Number(e.target.value), stock);
-                setQuantity(value);
-              }}
-            />
+              <div>
+                <Input
+                  type="number"
+                  min={1}
+                  max={selectedProduct?.stock || 1}
+                  placeholder="Quantity"
+                  value={quantity}
+                  onChange={(e) => handleQuantityChange(Number(e.target.value))}
+                  disabled={!selectedProduct}
+                />
+                {quantityError && (
+                  <p className="text-sm text-red-500 mt-1">{quantityError}</p>
+                )}
+              </div>
 
-            <Input
-              placeholder="Customer Name"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              required
-            />
+              <Input
+                placeholder="Customer Name"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
 
-            <div className="text-sm text-muted-foreground">Price: ₹{price}</div>
-            <div className="text-sm font-medium">Total: ₹{total}</div>
+              <div className="text-sm text-muted-foreground">Price: ₹{price}</div>
+              <div className="text-sm font-medium">Total: ₹{total}</div>
 
-            <Button type="submit" disabled={!productId || quantity <= 0}>
-              Submit Sale
-            </Button>
+              <Button 
+                type="submit" 
+                disabled={!productId || quantity <= 0 || quantityError !== "" || submitting}
+              >
+                {submitting ? "Submitting..." : "Submit Sale"}
+              </Button>
 
-            {status && (
-              <p className="text-sm text-muted-foreground">{status}</p>
-            )}
-          </form>
+              {status && (
+                <p className={`text-sm ${status.includes("recorded") ? "text-green-600" : "text-red-600"}`}>
+                  {status}
+                </p>
+              )}
+            </form>
+          )}
         </CardContent>
       </Card>
 

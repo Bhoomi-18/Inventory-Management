@@ -26,28 +26,28 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-64 bg-muted p-4 border-r flex flex-col justify-between">
+    <aside className="fixed top-0 left-0 h-screen w-64 bg-card text-card-foreground border-r border-border flex flex-col justify-between p-4">
       <div>
-        <h2 className="text-lg font-semibold mb-2 tracking-tight">Inventory</h2>
+        <h2 className="text-lg font-semibold mb-2 tracking-tight text-foreground">WareSync</h2>
         <Separator className="mb-4" />
-        <div className="mb-4 px-3 py-2 bg-stone-200 rounded-md">
+        <div className="mb-4 px-3 py-2 bg-muted rounded-md border border-border">
           <div className="flex items-center gap-2 mb-1">
             <User2 className="w-4 h-4 text-muted-foreground" />
-            <span className="font-bold">{user?.name || 'Guest'}</span>
+            <span className="font-semibold text-foreground">{user?.name || 'Guest'}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Mail className="w-4 h-4" />
             <span>{user?.email || 'N/A'}</span>
           </div>
         </div>
         <Separator className="mb-4" />
         <ScrollArea className="flex-1">
-          <nav className="flex flex-col gap-3">
+          <nav className="flex flex-col gap-2">
             {navItems.map(({ label, to, icon }) => (
               <Link
                 key={label}
                 to={to}
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted hover:text-foreground text-sm font-medium text-foreground"
               >
                 {icon}
                 {label}
@@ -58,7 +58,7 @@ const Sidebar = () => {
       </div>
       <div>
         <Separator className="my-4" />
-        <LogoutButton/>
+        <LogoutButton />
       </div>
     </aside>
   );

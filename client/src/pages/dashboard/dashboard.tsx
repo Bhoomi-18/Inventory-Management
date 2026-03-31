@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/apiClient";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
@@ -19,10 +19,10 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [productsRes, categoriesRes, lowStockRes, recentRes] = await Promise.all([
-          axios.get("https://inventory-management-ogu0.onrender.com/api/products"),
-          axios.get("https://inventory-management-ogu0.onrender.com/api/categories"),
-          axios.get("https://inventory-management-ogu0.onrender.com/api/products/low-stock"),
-          axios.get("https://inventory-management-ogu0.onrender.com/api/products?limit=5"),
+          api.get('/products'),
+          api.get('/categories'),
+          api.get('/products/low-stock'),
+          api.get('/products?limit=5'),
         ]);
 
         setMetrics({

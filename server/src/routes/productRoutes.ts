@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authenticate, requireTenant } from "../middleware/auth";
 import { addProduct } from "../controllers/product/addProduct";
 import { getProduct } from "../controllers/product/getProduct";
 import { getLowStock } from "../controllers/product/getLowStock";
@@ -7,6 +8,8 @@ import { editProduct } from "../controllers/product/editProduct";
 import { deleteProduct } from "../controllers/product/deleteProduct";
 
 const router = Router();
+
+router.use(authenticate, requireTenant);
 
 router.post("/", addProduct);
 router.get("/", getProduct);

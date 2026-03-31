@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import api from '../lib/apiClient';
 
 type User = { name: string; email: string };
 type AuthContextType = {
@@ -35,16 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const res = await fetch('https://inventory-management-ogu0.onrender.com/api/auth/me', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) throw new Error('User fetch failed');
-
-        const data = await res.json();
+        const response = await api.get('/auth/me');
+      const data = response.data;
         setUser(data);
       } catch (err) {
         console.error(err);

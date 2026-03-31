@@ -2,12 +2,18 @@ import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components/ui/select";
 import { productSchema, type ProductFormValues } from "../../schemas/productSchema";
+import { CategorySelector } from "../../components/ui/categorySelector";
+
+type Category = {
+  name: string;
+  color?: string;
+  icon?: string;
+};
 
 type Props = {
   initialValues?: ProductFormValues;
-  categories: string[];
+  categories: Category[];
   onSubmit: (data: ProductFormValues) => Promise<void>;
   onClose?: () => void;
 };
@@ -17,7 +23,7 @@ const ProductFormBody = ({ initialValues, categories, onSubmit, onClose }: Props
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema) as Resolver<ProductFormValues>,
     defaultValues: initialValues || {
@@ -28,42 +34,41 @@ const ProductFormBody = ({ initialValues, categories, onSubmit, onClose }: Props
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-      <Input placeholder="Name" {...register("name")} />
-      {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+      <div>
+        <Input placeholder="Product Name" {...register("name")} />
+        {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
+      </div>
 
-      <Input type="number" placeholder="Price" {...register("price", { valueAsNumber: true })} />
-      {errors.price && <p className="text-sm text-red-500">{errors.price.message}</p>}
+      <div>
+        <Input type="number" placeholder="Price" step="0.01" {...register("price", { valueAsNumber: true })} />
+        {errors.price && <p className="text-sm text-red-500 mt-1">{errors.price.message}</p>}
+      </div>
 
-      <Input type="number" placeholder="Stock" {...register("stock", { valueAsNumber: true })} />
-      {errors.stock && <p className="text-sm text-red-500">{errors.stock.message}</p>}
+      <div>
+        <Input type="number" placeholder="Stock" {...register("stock", { valueAsNumber: true })} />
+        {errors.stock && <p className="text-sm text-red-500 mt-1">{errors.stock.message}</p>}
+      </div>
 
       <Controller
         name="category"
         control={control}
         render={({ field }) => (
-          <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CategorySelector
+            value={field.value}
+            onChange={field.onChange}
+            categories={categories}
+          />
         )}
       />
-      {errors.category && <p className="text-sm text-red-500">{errors.category.message}</p>}
+      {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category.message}</p>}
 
-      <div className="flex justify-end gap-3">
-        <Button type="submit">Save</Button>
-        {onClose && (
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-        )}
+      <div className="flex justify-end gap-3 pt-2">
+        <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save"}
+        </Button>
       </div>
     </form>
   );

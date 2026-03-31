@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import ProductTable from "../../components/sections/productTable";
-import axios from "axios";
+import api from "../../lib/apiClient";
 import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -13,10 +13,11 @@ const CategoryProducts = () => {
     const [showAddDialog, setShowAddDialog] = useState(false);
 
   useEffect(() => {
-    axios.get(`https://inventory-management-ogu0.onrender.com/api/products/category/${name}`)
+    api
+      .get(`/products/category/${name}`)
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));
-  }, []);
+  }, [name]);
 
   function handleAddSuccess(newProduct: Product): void {
     setProducts((prev) => [newProduct, ...prev]);

@@ -35,14 +35,14 @@ const TopProductsTable = ({ sales }: Props) => {
     .slice(0, 5);
 
   return (
-    <div className="p-6 bg-white rounded-md shadow-md space-y-6 border border-gray-200">
-      <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+    <div className="p-6 rounded-md shadow-md space-y-6 border border-border bg-card text-card-foreground dark:shadow-lg">
+      <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
         <PackageSearch className="w-6 h-6 text-purple-500" />
         Top-Selling Products
       </h2>
 
-      <table className="w-full text-sm border border-gray-200 rounded-md overflow-hidden">
-        <thead className="bg-gray-50 text-gray-600">
+      <table className="w-full text-sm border border-border rounded-md overflow-hidden bg-card text-foreground">
+        <thead className="bg-muted text-muted-foreground">
           <tr>
             <th className="px-4 py-2 text-left font-medium">
               <div className="flex items-center gap-1">
@@ -68,11 +68,11 @@ const TopProductsTable = ({ sales }: Props) => {
           {rows.map(([name, stats], index) => (
             <tr
               key={name}
-              className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+              className={index % 2 === 0 ? "bg-card dark:bg-gray-800" : "bg-muted dark:bg-gray-700"}
             >
-              <td className="px-4 py-2 font-semibold text-gray-800">{name}</td>
+              <td className="px-4 py-2 font-semibold text-foreground dark:text-card-foreground">{name}</td>
               <td className="px-4 py-2 text-center">{stats.quantity}</td>
-              <td className="px-4 py-2 text-right text-green-700 font-medium">
+              <td className="px-4 py-2 text-right text-emerald-700 dark:text-emerald-300 font-medium">
                 ₹{stats.revenue.toFixed(2)}
               </td>
             </tr>

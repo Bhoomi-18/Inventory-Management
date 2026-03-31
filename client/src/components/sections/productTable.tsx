@@ -2,17 +2,28 @@ import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowMode
   getFilteredRowModel, flexRender, } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "../ui/table";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle,
-DialogFooter, } from "../ui/dialog";
 
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { columns } from "./column";
 import { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import type { Product } from "../../schemas/productSchema";
 import EditProductDialog from "./editProduct";
-import axios from "axios";
+import { DeleteProductDialog } from "./deleteProduct";
+import api from "../../lib/apiClient";
+
+type Category = {
+  name: string;
+  color?: string;
+};
 
 type Props = {
   products: Product[];
@@ -27,11 +38,26 @@ const ProductTable = ({ products: initialProducts }: Props) => {
     pageIndex: 0,
   });
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [categories, setCategories] = useState<Map<string, Category>>(new Map());
 
   useEffect(() => {
     setProducts(initialProducts);
   }, [initialProducts]);
+
+  useEffect(() => {
+    // Fetch categories for color mapping
+    api
+      .get('/categories')
+      .then((res) => {
+        const categoryMap = new Map<string, Category>(
+          res.data.map((cat: Category) => [cat.name, cat])
+        );
+        setCategories(categoryMap);
+      })
+      .catch((err) => console.error('Failed to fetch categories', err));
+  }, []);
 
   const table = useReactTable({
     data: products,
@@ -56,18 +82,11 @@ const ProductTable = ({ products: initialProducts }: Props) => {
     setEditingProduct(null);
   };
 
-  const confirmDelete = async () => {
-    if (!productToDelete) return;
-    try {
-      await axios.delete(`https://inventory-management-ogu0.onrender.com/api/products/${productToDelete._id}`);
-      setProducts((prev) => prev.filter((p) => p._id !== productToDelete._id));
-    } catch (error) {
-      console.error("Failed to delete product:", error);
-    } finally {
-      setProductToDelete(null);
-    }
+  const handleDeleteSuccess = () => {
+    setProducts((prev) => prev.filter((p) => p._id !== productToDelete?._id));
+    setDeleteOpen(false);
+    setProductToDelete(null);
   };
-
 
   return (
     <div className="space-y-4">
@@ -95,56 +114,53 @@ const ProductTable = ({ products: initialProducts }: Props) => {
 
         <TableBody>
           {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(row.original)}
+            table.getRowModel().rows.map((row) => {
+              const categoryColor = categories.get(row.original.category)?.color || '#E5E7EB';
+              return (
+                <TableRow key={row.id}>
+                  <TableCell
+                    style={{
+                      borderLeft: `4px solid ${categoryColor}`,
+                      paddingLeft: '12px',
+                    }}
                   >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setProductToDelete(row.original)}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>
-                          Are you sure you want to delete&nbsp;
-                          <span className="font-semibold">{ row.original.name}</span>?
-                        </DialogTitle>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setProductToDelete(null)}>
-                          Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={confirmDelete}>
-                          Delete
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </TableCell>
-              </TableRow>
-            ))
+                    {flexRender(
+                      table.getAllColumns()[0].columnDef.cell,
+                      row.getVisibleCells()[0].getContext()
+                    )}
+                  </TableCell>
+                  {row.getVisibleCells().slice(1).map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(row.original)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setProductToDelete(row.original);
+                        setDeleteOpen(true);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length + 2} className="text-center">
+              <TableCell colSpan={columns.length + 2} className="text-center py-8 text-muted-foreground">
                 No products found.
               </TableCell>
             </TableRow>
@@ -152,30 +168,62 @@ const ProductTable = ({ products: initialProducts }: Props) => {
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="text-sm text-muted-foreground">
+          Page {pagination.pageIndex + 1} of {table.getPageCount()}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted-foreground">Rows per page:</label>
+          <Select value={String(pagination.pageSize)} onValueChange={(value) => {
+            table.setPageSize(parseInt(value));
+          }}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
 
       {editingProduct && (
         <EditProductDialog
           product={editingProduct}
-          onClose={() => setEditingProduct(null)}
           onSuccess={handleUpdate}
+          onClose={() => setEditingProduct(null)}
+        />
+      )}
+
+      {productToDelete && (
+        <DeleteProductDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          productName={productToDelete.name}
+          productId={productToDelete._id}
+          onSuccess={handleDeleteSuccess}
         />
       )}
     </div>

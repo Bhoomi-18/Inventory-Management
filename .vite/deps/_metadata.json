@@ -1,0 +1,50 @@
+{
+  "hash": "18a71a69",
+  "configHash": "a2aaa2b1",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "29a7f140",
+  "optimized": {
+    "@radix-ui/react-slot": {
+      "src": "../../client/node_modules/@radix-ui/react-slot/dist/index.mjs",
+      "file": "@radix-ui_react-slot.js",
+      "fileHash": "231bf891",
+      "needsInterop": false
+    },
+    "class-variance-authority": {
+      "src": "../../client/node_modules/class-variance-authority/dist/index.mjs",
+      "file": "class-variance-authority.js",
+      "fileHash": "665c17c1",
+      "needsInterop": false
+    },
+    "clsx": {
+      "src": "../../client/node_modules/clsx/dist/clsx.mjs",
+      "file": "clsx.js",
+      "fileHash": "c302f7a8",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../client/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "1c90cb87",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../client/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "d943fa79",
+      "needsInterop": true
+    },
+    "tailwind-merge": {
+      "src": "../../client/node_modules/tailwind-merge/dist/bundle-mjs.mjs",
+      "file": "tailwind-merge.js",
+      "fileHash": "e3c955e1",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "react-CNKIvybO": {
+      "file": "react-CNKIvybO.js",
+      "isDynamicEntry": false
+    }
+  }
+}

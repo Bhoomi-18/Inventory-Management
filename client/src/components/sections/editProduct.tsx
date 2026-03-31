@@ -1,8 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/apiClient";
 import ProductFormBody from "../../pages/product/productForm";
 import { type Product, type ProductFormValues } from "../../schemas/productSchema";
+
+type Category = {
+  name: string;
+  color?: string;
+  icon?: string;
+};
 
 type Props = {
   product: Product;
@@ -10,19 +16,28 @@ type Props = {
   onClose: () => void;
 };
 
-
 const EditProductDialog = ({ product, onSuccess, onClose }: Props) => {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("https://inventory-management-ogu0.onrender.com/api/categories").then((res) =>
-      setCategories(res.data.map((cat: { name: string }) => cat.name))
-    );
+    setLoading(true);
+    api
+      .get('/categories')
+      .then((res) => setCategories(res.data))
+      .catch((err) => console.error('Failed to fetch categories', err))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleUpdate = async (data: ProductFormValues) => {
-    const res = await axios.put(`https://inventory-management-ogu0.onrender.com/api/products/${product._id}`, data);
-    onSuccess(res.data);
+    try {
+      const res = await api.put(`/products/${product._id}`, data);
+      onSuccess(res.data);
+      onClose();
+    } catch (err) {
+      console.error("Product update failed", err);
+      throw err;
+    }
   };
 
   return (
@@ -31,12 +46,18 @@ const EditProductDialog = ({ product, onSuccess, onClose }: Props) => {
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
-        <ProductFormBody
-          initialValues={product}
-          categories={categories}
-          onSubmit={handleUpdate}
-          onClose={onClose}
-        />
+        {loading ? (
+          <div className="py-8 text-center text-muted-foreground">
+            Loading categories...
+          </div>
+        ) : (
+          <ProductFormBody
+            initialValues={product}
+            categories={categories}
+            onSubmit={handleUpdate}
+            onClose={onClose}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

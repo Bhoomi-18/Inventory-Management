@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-
+import api from "../../lib/apiClient";
 import ProductTable from "../../components/sections/productTable";
 import { Button } from "../../components/ui/button";
 import { Separator } from "../../components/ui/separator";
 import { PlusCircle } from "lucide-react";
 import type { Product } from "../../schemas/productSchema";
-
 import AddProductDialog from "../../components/sections/addProduct";
 import EditProductDialog from "../../components/sections/editProduct";
 
@@ -14,12 +12,19 @@ const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = () => {
+    setLoading(true);
+    api
+      .get('/products')
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error('Failed to fetch products', err))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    axios
-      .get("https://inventory-management-ogu0.onrender.com/api/products")
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error("Failed to fetch products", err));
+    fetchProducts();
   }, []);
 
   const handleAddSuccess = (newProduct: Product) => {
@@ -54,10 +59,16 @@ const Products = () => {
 
       <Separator />
 
-      <ProductTable
-        products={products}
-        onEdit={(product: Product) => setEditProduct(product)}
-      />
+      {loading ? (
+        <div className="py-12 text-center text-muted-foreground">
+          Loading products...
+        </div>
+      ) : (
+        <ProductTable
+          products={products}
+          onEdit={(product: Product) => setEditProduct(product)}
+        />
+      )}
 
       {editProduct && (
         <EditProductDialog

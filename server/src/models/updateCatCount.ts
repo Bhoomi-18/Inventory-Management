@@ -1,7 +1,7 @@
-import { Product } from "./productModel";
-import { Category } from "./categoryModel";
+import { getTenantModels } from "./tenantModels";
 
-export const updateCategoryCount = async (categoryName: string) => {
+export const updateCategoryCount = async (tenantId: string, categoryName: string) => {
+  const { Product, Category } = await getTenantModels(tenantId);
   const count = await Product.countDocuments({ category: categoryName });
   await Category.findOneAndUpdate({ name: categoryName }, { count });
 };

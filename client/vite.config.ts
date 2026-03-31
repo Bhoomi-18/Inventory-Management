@@ -14,7 +14,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": "https://inventory-management-ogu0.onrender.com",
+      "/api":  {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
     },
   },
 

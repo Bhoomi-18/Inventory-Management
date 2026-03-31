@@ -10,6 +10,7 @@ import CategoryProducts from "../pages/category/categoryProducts";
 import LowStockProducts from "../pages/product/lowStock";
 import AddSale from "../pages/sales/addSale";
 import ReportsDashboard from "../pages/report/reportDashboard";
+import Settings from "../pages/settings/settings";
 import PrivateRoute from "./privateRoute";
 
 const AppRoutes = () => {
@@ -27,6 +28,7 @@ const AppRoutes = () => {
           <Route path="categories/:name" element={<CategoryProducts />} />
           <Route path="sales" element={<AddSale />} />
           <Route path="reports" element={<ReportsDashboard />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

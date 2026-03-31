@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { loginUser } from '../controllers/auth/loginUser';
 import { signUpUser } from '../controllers/auth/signUpUser';
 import { getUser } from '../controllers/auth/getUser';
+import { updateUser } from '../controllers/auth/updateUser';
+import { updatePassword } from '../controllers/auth/updatePassword';
 import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -32,6 +34,7 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
 };
 
 router.get('/me', authenticate, getUser);
-
+router.put('/me', authenticate, updateUser);
+router.put('/me/password', authenticate, updatePassword);
 
 export default router;

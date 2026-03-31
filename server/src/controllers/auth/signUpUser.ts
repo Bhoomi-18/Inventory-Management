@@ -6,8 +6,16 @@ import jwt from 'jsonwebtoken';
 export const signUpUser = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
-  if (!password || password.length < 6) {
-    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+  if (!password || password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters and include lowercase, uppercase, digit and symbol.' });
+  }
+
+  if (!/[a-z]/.test(password)
+      || !/[A-Z]/.test(password)
+      || !/[0-9]/.test(password)
+      || !/[^A-Za-z0-9]/.test(password)
+  ) {
+    return res.status(400).json({ message: 'Password must include lowercase, uppercase, digit and symbol.' });
   }
 
   try {

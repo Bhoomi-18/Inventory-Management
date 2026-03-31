@@ -52,6 +52,15 @@ textarea {
   font: inherit;
 }
 
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+a:hover {
+  cursor: pointer;
+}
+
 .card-neutral {
   background: var(--card);
   border: 1px solid var(--border);

@@ -16,9 +16,9 @@ const AppearanceSection = ({ theme, setTheme, setStatus }: Props) => {
   };
 
   return (
-    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+    <div className="p-4 border border-border rounded-lg bg-card text-card-foreground shadow-sm">
       <div className="flex items-center gap-2 mb-3">
-        <SlidersHorizontal className="w-5 h-5 text-blue-500" />
+        <SlidersHorizontal className="w-5 h-5 text-foreground" />
         <h2 className="text-lg font-semibold">Appearance</h2>
       </div>
       <div className="space-y-2">
@@ -26,7 +26,7 @@ const AppearanceSection = ({ theme, setTheme, setStatus }: Props) => {
         <select
           value={theme}
           onChange={onChangeTheme}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+          className="w-full border border-border rounded-md px-3 py-2 bg-input text-foreground dark:bg-input dark:text-card-foreground"
         >
           <option value="light">Light</option>
           <option value="dark">Dark</option>

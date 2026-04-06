@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogClose,
 } from '../ui/dialog';
 import { Button } from '../ui/button';
 
@@ -36,7 +37,9 @@ const LogoutButton = () => {
             <DialogTitle>Are you sure you want to log out?</DialogTitle>
           </DialogHeader>
           <DialogFooter className="flex gap-3 justify-end">
-            <Button variant="outline">Cancel</Button>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
             <Button variant="destructive" onClick={handleLogout}>
               Confirm Logout
             </Button>

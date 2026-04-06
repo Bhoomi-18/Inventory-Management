@@ -75,3 +75,17 @@ a:hover {
   background: var(--primary);
   color: var(--primary-fg);
 }
+
+background: var(--card);
+border: 1px solid var(--border);
+}
+
+.btn-neutral {
+  background: var(--muted);
+  color: var(--fg);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-fg);
+}

@@ -7,7 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // 90s timeout – Render free tier can take 50-60s to cold-start
+  // 90s timeout — Render free tier takes up to 60s to cold-start
   timeout: 90000,
 });
 
@@ -22,13 +22,15 @@ api.interceptors.request.use((config) => {
 export default api;
 
 /**
- * Wakes up the Render backend by hitting /health.
- * Call this once when the app loads so the server is ready by login time.
+ * True only in production Vercel deployment (VITE_API_URL is set at build time).
+ * In local dev, VITE_API_URL is undefined so this is false.
  */
-export const pingServer = async (): Promise<void> => {
-  try {
-    await axios.get(`${API_BASE_URL}/health`, { timeout: 90000 });
-  } catch {
-    // Ignore errors – this is fire-and-forget
-  }
-};
+export const IS_PROD = Boolean(import.meta.env.VITE_API_URL);
+
+/**
+ * Returns true ONLY for genuine request timeouts (ECONNABORTED).
+ * Does NOT match ERR_CONNECTION_REFUSED ("Network Error") — that is a local
+ * backend-not-running error, not a Render cold-start.
+ */
+export const isRenderColdStart = (err: any): boolean =>
+  IS_PROD && err?.code === 'ECONNABORTED';

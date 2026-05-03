@@ -5,11 +5,9 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import { loginSchema } from '../../schemas/authSchema';
-import api from '../../lib/apiClient';
+import api, { IS_PROD, isRenderColdStart } from '../../lib/apiClient';
 import { useState, useEffect, useRef } from 'react';
 import { AlertCircle, CheckCircle, Loader2, ServerCrash } from 'lucide-react';
-
-const IS_PROD = Boolean(import.meta.env.VITE_API_URL);
 
 const LoginForm = () => {
   const [serverError, setServerError] = useState<string>('');
@@ -21,10 +19,8 @@ const LoginForm = () => {
   // Pre-warm backend on mount (production only)
   useEffect(() => {
     if (!IS_PROD) return;
-    const ctrl = new AbortController();
     const base = import.meta.env.VITE_API_URL as string;
-    fetch(`${base}/health`, { signal: ctrl.signal }).catch(() => {});
-    return () => ctrl.abort();
+    fetch(`${base}/health`).catch(() => {});
   }, []);
 
   const startWakeProgress = () => {
@@ -32,7 +28,7 @@ const LoginForm = () => {
     setWakingUp(true);
     let p = 0;
     progressRef.current = setInterval(() => {
-      p += 100 / 85; // reach ~100% in 85 s
+      p += 100 / 85;
       setWakeProgress(Math.min(p, 98));
     }, 1000);
   };
@@ -44,10 +40,13 @@ const LoginForm = () => {
     setWakeProgress(100);
   };
 
-  const isTimeout = (err: any) =>
-    err?.code === 'ECONNABORTED' ||
-    err?.message?.includes('timeout') ||
-    err?.message?.includes('Network Error');
+  const getErrorMessage = (err: any): string => {
+    if (err?.response?.data?.message) return err.response.data.message;
+    // Local backend not running
+    if (!IS_PROD && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK'))
+      return 'Cannot connect to server. Make sure the backend is running on port 5000.';
+    return 'Login failed. Please try again.';
+  };
 
   const {
     register,
@@ -71,20 +70,18 @@ const LoginForm = () => {
     try {
       await attemptLogin(data);
     } catch (err: any) {
-      // If it's a timeout (cold start), show wake-up UI and retry ONCE
-      if (IS_PROD && isTimeout(err)) {
+      // Only show wake-up UI for genuine Render cold-start timeouts in production
+      if (isRenderColdStart(err)) {
         startWakeProgress();
         try {
           await attemptLogin(getValues());
           stopWakeProgress();
         } catch (retryErr: any) {
           stopWakeProgress();
-          const msg = retryErr.response?.data?.message;
-          setServerError(msg || 'Server is still starting up. Please try again in a moment.');
+          setServerError(getErrorMessage(retryErr));
         }
       } else {
-        const msg = err.response?.data?.message || 'Login failed. Please try again.';
-        setServerError(msg);
+        setServerError(getErrorMessage(err));
         console.error('Login error:', err);
       }
     }
@@ -93,7 +90,7 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
-      {/* Server waking up banner */}
+      {/* Server waking up banner — only shows on production cold-start */}
       {wakingUp && (
         <div
           className="border rounded-lg p-3 space-y-2"
@@ -104,9 +101,8 @@ const LoginForm = () => {
             <p className="text-sm font-medium">Server is waking up from sleep…</p>
           </div>
           <p className="text-xs" style={{ color: '#b45309' }}>
-            The free server sleeps after inactivity. First login takes up to 60 seconds. Please wait — your request will retry automatically.
+            The free server sleeps after inactivity. First login may take up to 60 seconds — retrying automatically.
           </p>
-          {/* Progress bar */}
           <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#fde68a' }}>
             <div
               className="h-full rounded-full transition-all duration-1000"
@@ -116,7 +112,6 @@ const LoginForm = () => {
         </div>
       )}
 
-      {/* Error */}
       {serverError && !wakingUp && (
         <div className="alert-error flex items-start gap-3 p-3 border rounded-lg">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -124,7 +119,6 @@ const LoginForm = () => {
         </div>
       )}
 
-      {/* Success */}
       {successMessage && (
         <div className="alert-success flex items-start gap-3 p-3 border rounded-lg">
           <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -133,39 +127,21 @@ const LoginForm = () => {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-semibold">
-          Email Address
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="you@example.com"
-          className="h-10"
-          {...register('email')}
-        />
+        <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
+        <Input id="email" type="email" placeholder="you@example.com" className="h-10" {...register('email')} />
         {errors.email && (
           <p className="text-sm text-red-500 flex items-start gap-2">
-            <span className="font-bold">•</span>
-            {errors.email.message}
+            <span className="font-bold">•</span>{errors.email.message}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-semibold">
-          Password
-        </Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Enter your password"
-          className="h-10"
-          {...register('password')}
-        />
+        <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
+        <Input id="password" type="password" placeholder="Enter your password" className="h-10" {...register('password')} />
         {errors.password && (
           <p className="text-sm text-red-500 flex items-start gap-2">
-            <span className="font-bold">•</span>
-            {errors.password.message}
+            <span className="font-bold">•</span>{errors.password.message}
           </p>
         )}
       </div>

@@ -5,11 +5,9 @@ import { signupSchema } from '../../schemas/authSchema';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
-import api from '../../lib/apiClient';
+import api, { IS_PROD, isRenderColdStart } from '../../lib/apiClient';
 import { useState, useEffect, useRef } from 'react';
 import { AlertCircle, CheckCircle, Loader2, ServerCrash } from 'lucide-react';
-
-const IS_PROD = Boolean(import.meta.env.VITE_API_URL);
 
 const SignupForm = () => {
   const [serverError, setServerError] = useState<string>('');
@@ -43,10 +41,14 @@ const SignupForm = () => {
     setWakeProgress(100);
   };
 
-  const isTimeout = (err: any) =>
-    err?.code === 'ECONNABORTED' ||
-    err?.message?.includes('timeout') ||
-    err?.message?.includes('Network Error');
+  const isTimeout = isRenderColdStart;
+
+  const getErrorMessage = (err: any): string => {
+    if (err?.response?.data?.message) return err.response.data.message;
+    if (!IS_PROD && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK'))
+      return 'Cannot connect to server. Make sure the backend is running on port 5000.';
+    return 'Signup failed. Please try again.';
+  };
 
   const {
     register,
@@ -86,10 +88,10 @@ const SignupForm = () => {
           stopWakeProgress();
         } catch (retryErr: any) {
           stopWakeProgress();
-          setServerError(retryErr.response?.data?.message || 'Server is still starting up. Please try again in a moment.');
+          setServerError(getErrorMessage(retryErr));
         }
       } else {
-        setServerError(err.response?.data?.message || 'Signup failed. Please try again.');
+        setServerError(getErrorMessage(err));
         console.error('Signup error:', err);
       }
     }

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../lib/apiClient";
-import { Card, CardContent } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
 import { Input } from "../../components/ui/input"; 
 import LowStockList from "./lowStockList";
@@ -73,8 +72,8 @@ const ReportsDashboard = () => {
       <Separator />
 
       {dateError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700">{dateError}</p>
+        <div className="alert-error p-3 border rounded-lg">
+          <p className="text-sm">{dateError}</p>
         </div>
       )}
 
@@ -82,21 +81,21 @@ const ReportsDashboard = () => {
         <div className="text-center text-muted-foreground py-8">Loading reports data...</div>
       ) : (
         <>
-          <Card className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4">
-            <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-card border border-border rounded-xl shadow-sm">
+            <div className="px-2">
               <p className="text-sm text-muted-foreground">Total Sales</p>
               <p className="text-lg font-semibold">{filteredSales.length}</p>
-            </CardContent>
-            <CardContent>
+            </div>
+            <div className="px-2">
               <p className="text-sm text-muted-foreground">Revenue</p>
               <p className="text-lg font-semibold">₹{totalRevenue.toFixed(2)}</p>
-            </CardContent>
-            <CardContent>
+            </div>
+            <div className="px-2">
               <p className="text-sm text-muted-foreground">Avg Order</p>
               <p className="text-lg font-semibold">₹{avgOrderValue}</p>
-            </CardContent>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">From</p>
+            </div>
+            <div className="px-2">
+              <p className="text-sm text-muted-foreground mb-1">From</p>
               <Input 
                 type="date" 
                 value={fromDate} 
@@ -104,9 +103,9 @@ const ReportsDashboard = () => {
                 onFocus={(e) => (e.target as HTMLInputElement).showPicker?.()}
                 className={dateError ? "border-red-300 dark:border-red-400" : ""}
               />
-            </CardContent>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">To</p>
+            </div>
+            <div className="px-2">
+              <p className="text-sm text-muted-foreground mb-1">To</p>
               <Input 
                 type="date" 
                 value={toDate} 
@@ -114,8 +113,8 @@ const ReportsDashboard = () => {
                 onFocus={(e) => (e.target as HTMLInputElement).showPicker?.()}
                 className={dateError ? "border-red-300 dark:border-red-400" : ""}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
       <LowStockList products={products} />
       <TopProductsTable sales={filteredSales} />

@@ -53,16 +53,16 @@ const SignupForm = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {serverError && (
-        <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">{serverError}</p>
+        <div className="alert-error flex items-start gap-3 p-3 border rounded-lg">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <p className="text-sm">{serverError}</p>
         </div>
       )}
 
       {successMessage && (
-        <div className="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-green-700">{successMessage}</p>
+        <div className="alert-success flex items-start gap-3 p-3 border rounded-lg">
+          <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <p className="text-sm">{successMessage}</p>
         </div>
       )}
 

@@ -67,7 +67,7 @@ const CategoryCard = ({
               variant="ghost"
               size="sm"
               onClick={onDelete}
-              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete

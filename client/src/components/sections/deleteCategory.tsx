@@ -50,21 +50,21 @@ export function DeleteCategoryDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="alert-error flex items-start gap-3 p-3 border rounded-lg">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <div className="space-y-2">
-              <p className="text-sm font-medium text-red-900">
+              <p className="text-sm font-medium">
                 Delete <strong>{categoryName}</strong>?
               </p>
-              <p className="text-sm text-red-700">
+              <p className="text-sm">
                 This action cannot be undone. Make sure there are no products in this category.
               </p>
             </div>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="alert-error p-3 border rounded-lg">
+              <p className="text-sm">{error}</p>
             </div>
           )}
         </div>

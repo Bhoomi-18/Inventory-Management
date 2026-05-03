@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Moon, Sun, Monitor } from "lucide-react";
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -8,30 +8,46 @@ interface Props {
   setStatus: (s: string) => void;
 }
 
-const AppearanceSection = ({ theme, setTheme, setStatus }: Props) => {
-  const onChangeTheme = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value as Theme;
-    setTheme(value);
-    setStatus(`Theme set to ${value}`);
-  };
+const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
+  { value: 'light', label: 'Light', icon: <Sun className="w-4 h-4" /> },
+  { value: 'dark', label: 'Dark', icon: <Moon className="w-4 h-4" /> },
+  { value: 'system', label: 'System', icon: <Monitor className="w-4 h-4" /> },
+];
 
+const AppearanceSection = ({ theme, setTheme, setStatus }: Props) => {
   return (
     <div className="p-4 border border-border rounded-lg bg-card text-card-foreground shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-4">
         <SlidersHorizontal className="w-5 h-5 text-foreground" />
         <h2 className="text-lg font-semibold">Appearance</h2>
       </div>
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">Theme</label>
-        <select
-          value={theme}
-          onChange={onChangeTheme}
-          className="w-full border border-border rounded-md px-3 py-2 bg-input text-foreground dark:bg-input dark:text-card-foreground"
-        >
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="system">System</option>
-        </select>
+
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-foreground">Theme</label>
+        <div className="flex gap-2 flex-wrap">
+          {themeOptions.map(({ value, label, icon }) => (
+            <button
+              key={value}
+              onClick={() => {
+                setTheme(value);
+                setStatus(`Theme set to ${value}`);
+              }}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border transition-all
+                ${theme === value
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'bg-background text-foreground border-border hover:bg-muted'
+                }
+              `}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {theme === 'system' ? 'Follows your system preference.' : `Currently using ${theme} theme.`}
+        </p>
       </div>
     </div>
   );

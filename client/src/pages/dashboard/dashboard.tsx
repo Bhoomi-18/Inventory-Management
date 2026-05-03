@@ -102,38 +102,50 @@ const Dashboard = () => {
     {
       label: "Total Products",
       value: metrics.totalProducts,
-      icon: <Package className="w-5 h-5 text-primary" />,
+      icon: <Package className="w-5 h-5" />,
       link: "/inventory/products",
+      gradient: "linear-gradient(135deg, #2563eb, #3b82f6)",
+      accent: "#2563eb",
     },
     {
       label: "Total Sales",
       value: metrics.totalSales,
-      icon: <ShoppingCart className="w-5 h-5 text-blue-500" />,
+      icon: <ShoppingCart className="w-5 h-5" />,
       link: "/inventory/sales",
+      gradient: "linear-gradient(135deg, #0891b2, #06b6d4)",
+      accent: "#0891b2",
     },
     {
       label: "Revenue",
       value: `₹${metrics.totalRevenue.toFixed(2)}`,
-      icon: <DollarSign className="w-5 h-5 text-green-500" />,
+      icon: <DollarSign className="w-5 h-5" />,
       link: "/inventory/reports",
+      gradient: "linear-gradient(135deg, #059669, #10b981)",
+      accent: "#059669",
     },
     {
       label: "Low Stock",
       value: metrics.lowStock,
-      icon: <AlertCircle className="w-5 h-5 text-red-500" />,
+      icon: <AlertCircle className="w-5 h-5" />,
       link: "/inventory/products/low-stock",
+      gradient: "linear-gradient(135deg, #dc2626, #f87171)",
+      accent: "#dc2626",
     },
     {
       label: "Categories",
       value: metrics.totalCategories,
-      icon: <Tags className="w-5 h-5 text-purple-500" />,
+      icon: <Tags className="w-5 h-5" />,
       link: "/inventory/categories",
+      gradient: "linear-gradient(135deg, #7c3aed, #a78bfa)",
+      accent: "#7c3aed",
     },
     {
       label: "Recent Sales",
       value: metrics.recentSales,
-      icon: <TrendingUp className="w-5 h-5 text-orange-500" />,
+      icon: <TrendingUp className="w-5 h-5" />,
       link: "/inventory/sales",
+      gradient: "linear-gradient(135deg, #d97706, #f59e0b)",
+      accent: "#d97706",
     },
   ];
 
@@ -143,15 +155,30 @@ const Dashboard = () => {
       <Separator />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {metricCards.map(({ label, value, icon, link }) => (
+        {metricCards.map(({ label, value, icon, link, gradient, accent }) => (
           <Link to={link} key={label}>
-            <Card className="cursor-pointer hover:shadow-md transition">
-              <CardHeader className="flex items-center gap-3">
+            <div
+              className="relative overflow-hidden rounded-xl border p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg group"
+              style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
+            >
+              {/* Coloured top accent */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl" style={{ background: gradient }} />
+
+              {/* Icon bubble */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white mb-3"
+                style={{ background: gradient }}
+              >
                 {icon}
-                <CardTitle className="text-base">{label}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-2xl font-semibold">{value}</CardContent>
-            </Card>
+              </div>
+
+              <p className="text-xs font-medium mb-1" style={{ color: "var(--muted-foreground)" }}>
+                {label}
+              </p>
+              <p className="text-xl font-bold" style={{ color: accent }}>
+                {value}
+              </p>
+            </div>
           </Link>
         ))}
       </div>

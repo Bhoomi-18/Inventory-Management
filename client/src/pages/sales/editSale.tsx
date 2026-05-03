@@ -97,9 +97,9 @@ const EditSaleDialog = ({ sale, onSuccess, onClose }: Props) => {
               placeholder="Quantity"
             />
             {quantityError && (
-              <div className="flex items-start gap-2 mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-yellow-700">{quantityError}</p>
+              <div className="alert-warning flex items-start gap-2 mt-2 p-2 border rounded">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <p className="text-sm">{quantityError}</p>
               </div>
             )}
           </div>

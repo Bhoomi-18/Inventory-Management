@@ -8,10 +8,11 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen">
-      {/* Mobile Header - Only visible on mobile */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-foreground">WareSync</h1>
+    <div className="flex h-screen bg-background">
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 border-b border-border px-4 py-3 flex items-center justify-between"
+        style={{ backgroundColor: "var(--sidebar)" }}>
+        <span className="text-base font-bold tracking-tight brand-gradient">WareSync</span>
         <Button
           variant="ghost"
           size="sm"
@@ -25,25 +26,30 @@ const Layout = () => {
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-30 bg-black/50"
+          className="lg:hidden fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        w-64 bg-card text-card-foreground border-r border-border flex flex-col justify-between p-4
-        lg:static lg:z-auto
-        fixed top-0 left-0 h-screen z-40
-        transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <aside
+        className={`
+          w-64 flex flex-col justify-between p-4 border-r border-border
+          lg:static lg:z-auto
+          fixed top-0 left-0 h-screen z-40
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        `}
+        style={{ backgroundColor: "var(--sidebar)", color: "var(--sidebar-foreground)" }}
+      >
         <Sidebar />
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-16 lg:pt-6 p-4 lg:p-6">
-        <Outlet />
+      <main className="flex-1 overflow-auto pt-16 lg:pt-0">
+        <div className="p-4 lg:p-6 page-enter">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

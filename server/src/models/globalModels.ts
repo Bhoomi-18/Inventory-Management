@@ -1,21 +1,20 @@
 import mongoose from 'mongoose';
 import dbManager from '../lib/dbManager';
 
-let cachedModels: any = null;
-
+// The global connection is shared — models must be registered only once per connection.
+// Using connection.models to check before registering prevents OverwriteModelError.
 export async function getGlobalModels() {
-  if (cachedModels) return cachedModels;
-
   const globalConnection = await dbManager.getGlobalConnection();
 
-  const userSchema = new mongoose.Schema({
-    name: { type: String, required: true, minlength: 2 },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-  });
+  const User = globalConnection.models['User'] || globalConnection.model(
+    'User',
+    new mongoose.Schema({
+      name:     { type: String, required: true, minlength: 2 },
+      // lowercase + trim so "Bhoomi@test.com" == "bhoomi@test.com" in both local and prod
+      email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
+      password: { type: String, required: true },
+    })
+  );
 
-  const User = globalConnection.model('User', userSchema);
-
-  cachedModels = { User };
-  return cachedModels;
+  return { User };
 }

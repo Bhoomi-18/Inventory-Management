@@ -39,12 +39,23 @@ app.options('/{*path}', cors(corsOptions));
 
 app.use(express.json());
 
-// ── Health — always responds, even before DB is ready ──
+// ── Health — always available (no DB dependency) ──
+let dbConnected = false;
+let dbError: string | null = null;
+
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'ok',
+    db: dbConnected ? 'connected' : (dbError || 'connecting…'),
+    timestamp: new Date().toISOString(),
+  });
 });
 app.get('/api/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'ok',
+    db: dbConnected ? 'connected' : (dbError || 'connecting…'),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ── API routes — registered immediately ──
@@ -63,15 +74,22 @@ app.listen(PORT, () => {
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 if (!mongoUri) {
-  console.error('⚠  MONGO_URI / MONGODB_URI missing — all DB operations will fail');
+  dbError = 'MONGO_URI / MONGODB_URI not set';
+  console.error('⚠  ' + dbError + ' — all DB operations will fail');
 } else {
+  const safeUri = mongoUri.replace(/:\/\/.*@/, '://***@');
+  console.log(`MongoDB URI: ${safeUri}`);
+
   const connectWithRetry = async (attempt = 1): Promise<void> => {
     try {
       await dbManager.getGlobalConnection();
+      dbConnected = true;
+      dbError = null;
       console.log('✅ MongoDB connected');
-    } catch (err) {
+    } catch (err: any) {
+      dbError = err?.message || 'Unknown error';
       const delay = Math.min(attempt * 3000, 15000);
-      console.error(`❌ MongoDB attempt ${attempt} failed — retrying in ${delay / 1000}s`, err);
+      console.error(`❌ MongoDB attempt ${attempt} failed (${dbError}) — retrying in ${delay / 1000}s`);
       setTimeout(() => connectWithRetry(attempt + 1), delay);
     }
   };

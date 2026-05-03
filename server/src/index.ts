@@ -20,7 +20,6 @@ const allowedOrigins: (string | RegExp)[] = [
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin header (Postman, curl, same-origin)
     if (!origin) return callback(null, true);
     const allowed = allowedOrigins.some((p) =>
       typeof p === "string" ? p === origin : p.test(origin)
@@ -34,11 +33,19 @@ const corsOptions: CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-// Handle preflight OPTIONS requests for all routes
 app.options("*", cors(corsOptions));
 // ────────────────────────────────────────────────────────────────
 
 app.use(express.json());
+
+// ── Health check – keeps Render awake and lets frontend detect status ──
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 if (!mongoUri) {

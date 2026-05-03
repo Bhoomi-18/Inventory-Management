@@ -7,7 +7,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 20000,
+  // 90s timeout – Render free tier can take 50-60s to cold-start
+  timeout: 90000,
 });
 
 api.interceptors.request.use((config) => {
@@ -19,3 +20,15 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
+
+/**
+ * Wakes up the Render backend by hitting /health.
+ * Call this once when the app loads so the server is ready by login time.
+ */
+export const pingServer = async (): Promise<void> => {
+  try {
+    await axios.get(`${API_BASE_URL}/health`, { timeout: 90000 });
+  } catch {
+    // Ignore errors – this is fire-and-forget
+  }
+};

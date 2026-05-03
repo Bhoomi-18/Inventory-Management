@@ -6,12 +6,47 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import api from '../../lib/apiClient';
-import { useState } from 'react';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { AlertCircle, CheckCircle, Loader2, ServerCrash } from 'lucide-react';
+
+const IS_PROD = Boolean(import.meta.env.VITE_API_URL);
 
 const SignupForm = () => {
   const [serverError, setServerError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [wakingUp, setWakingUp] = useState(false);
+  const [wakeProgress, setWakeProgress] = useState(0);
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!IS_PROD) return;
+    const ctrl = new AbortController();
+    const base = import.meta.env.VITE_API_URL as string;
+    fetch(`${base}/health`, { signal: ctrl.signal }).catch(() => {});
+    return () => ctrl.abort();
+  }, []);
+
+  const startWakeProgress = () => {
+    setWakeProgress(0);
+    setWakingUp(true);
+    let p = 0;
+    progressRef.current = setInterval(() => {
+      p += 100 / 85;
+      setWakeProgress(Math.min(p, 98));
+    }, 1000);
+  };
+
+  const stopWakeProgress = () => {
+    if (progressRef.current) clearInterval(progressRef.current);
+    progressRef.current = null;
+    setWakingUp(false);
+    setWakeProgress(100);
+  };
+
+  const isTimeout = (err: any) =>
+    err?.code === 'ECONNABORTED' ||
+    err?.message?.includes('timeout') ||
+    err?.message?.includes('Network Error');
 
   const {
     register,
@@ -34,25 +69,51 @@ const SignupForm = () => {
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
     setServerError('');
     setSuccessMessage('');
-    try {
-      const { confirmPassword, ...payload } = data;
+    const { confirmPassword: _cp, ...payload } = data;
+    const attemptSignup = async () => {
       const response = await api.post('/auth/signup', payload);
-
       setSuccessMessage('Account created successfully! Redirecting...');
       localStorage.setItem('token', response.data.token);
-      setTimeout(() => {
-        window.location.href = '/inventory';
-      }, 1000);
+      setTimeout(() => { window.location.href = '/inventory'; }, 1000);
+    };
+    try {
+      await attemptSignup();
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Signup failed. Please try again.';
-      setServerError(errorMsg);
-      console.error('Signup error:', err);
+      if (IS_PROD && isTimeout(err)) {
+        startWakeProgress();
+        try {
+          await attemptSignup();
+          stopWakeProgress();
+        } catch (retryErr: any) {
+          stopWakeProgress();
+          setServerError(retryErr.response?.data?.message || 'Server is still starting up. Please try again in a moment.');
+        }
+      } else {
+        setServerError(err.response?.data?.message || 'Signup failed. Please try again.');
+        console.error('Signup error:', err);
+      }
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {serverError && (
+      {/* Server waking up banner */}
+      {wakingUp && (
+        <div className="border rounded-lg p-3 space-y-2" style={{ backgroundColor: '#fffbeb', borderColor: '#fde68a' }}>
+          <div className="flex items-center gap-2" style={{ color: '#92400e' }}>
+            <ServerCrash className="w-4 h-4 flex-shrink-0" />
+            <p className="text-sm font-medium">Server is waking up from sleep…</p>
+          </div>
+          <p className="text-xs" style={{ color: '#b45309' }}>
+            First signup may take up to 60 seconds. Please wait — retrying automatically.
+          </p>
+          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#fde68a' }}>
+            <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${wakeProgress}%`, background: 'linear-gradient(90deg,#f59e0b,#d97706)' }} />
+          </div>
+        </div>
+      )}
+
+      {serverError && !wakingUp && (
         <div className="alert-error flex items-start gap-3 p-3 border rounded-lg">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <p className="text-sm">{serverError}</p>
@@ -158,8 +219,13 @@ const SignupForm = () => {
         )}
       </div>
 
-      <Button type="submit" className="w-full h-10 text-base font-semibold" disabled={isSubmitting}>
-        {isSubmitting ? 'Creating account...' : 'Sign Up'}
+      <Button type="submit" className="w-full h-10 text-base font-semibold" disabled={isSubmitting || wakingUp}>
+        {isSubmitting || wakingUp ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            {wakingUp ? 'Waiting for server…' : 'Creating account...'}
+          </span>
+        ) : 'Sign Up'}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">

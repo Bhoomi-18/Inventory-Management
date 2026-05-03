@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/https://inventory-management-ogu0.onrender.com" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

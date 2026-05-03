@@ -8,8 +8,6 @@ import {
   DollarSign,
   BarChart3,
   Settings,
-  User2,
-  Mail,
 } from "lucide-react";
 import { useAuth } from "../../schemas/authContext";
 import LogoutButton from "./logout";

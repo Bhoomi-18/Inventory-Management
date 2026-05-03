@@ -32,7 +32,7 @@ const Login = () => {
         </div>
 
         <Card className="shadow-xl border border-border bg-card">
-          <CardHeader className="space-y-2 pb-4">
+          <CardHeader className="space-y-2 pb-2">
             <CardTitle className="text-lg font-bold text-card-foreground">Log In</CardTitle>
             <Separator />
           </CardHeader>

@@ -7,11 +7,14 @@ class DBManager {
 
   constructor() {
     const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
-    if (!uri) throw new Error('MONGO_URI or MONGODB_URI env var not set');
+    if (!uri) {
+      console.error('⚠  DBManager: MONGO_URI / MONGODB_URI not set — DB unavailable');
+      this.baseUri = '';
+      return;
+    }
     this.baseUri = uri.trim().replace(/\/*$/, '');
-
     const safeUri = this.baseUri.replace(/:\/\/.*@/, '://***@');
-    console.log(`DBManager using MongoDB URI from environment: ${safeUri}`);
+    console.log(`DBManager initialised with URI: ${safeUri}`);
   }
 
   sanitizeDbName(userId: string): string {
@@ -28,6 +31,7 @@ class DBManager {
 
   async getGlobalConnection(): Promise<Connection> {
     if (this.globalConnection) return this.globalConnection;
+    if (!this.baseUri) throw new Error('No MongoDB URI configured — set MONGO_URI or MONGODB_URI');
     const uri = this.buildUriForDb('global');
     console.log(`Connecting to global MongoDB: ${uri.replace(/:\/\/.*@/, '://***@')}`);
     this.globalConnection = await mongoose.createConnection(uri, {
